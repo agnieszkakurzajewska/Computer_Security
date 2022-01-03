@@ -2,33 +2,44 @@ version: "3.9"
    
 services:
 
-    db:
+    bank_db:
         image: postgres
+        container_name: bank_db
+        ports:
+            - "5432:5432"
         volumes:
             - ./data/db:/var/lib/postgresql/data
-        environment:
-            - "POSTGRES_HOST_AUTH_METHOD=trust"
         networks:
             - djangonetwork
 
-    web:
+    bank_web:
+        container_name: bank_web
         build: .
         command: python manage.py runserver 0.0.0.0:8000
         volumes:
             - .:/code
+        env_file:
+            - db.env
         ports:
             - "8000:8000"
-        environment:
-            - POSTGRES_NAME=postgres
-            - POSTGRES_USER=postgres
-            - POSTGRES_PASSWORD=postgres
-        links: 
-            - db:db
         depends_on:
-            - db
+            - bank_db
         networks:
             - djangonetwork
 
+    bank_pgadmin:
+        container_name: bank_pgadmin
+        image: dpage/pgadmin4
+        restart: always
+        ports:
+          - "5555:80"
+        depends_on:
+          - bank_db
+        links:
+          - bank_db
+        environment:
+          PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
+          PGADMIN_DEFAULT_PASSWORD: root
 networks:
     djangonetwork:
         driver: bridge
