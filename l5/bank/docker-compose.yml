@@ -1,45 +1,42 @@
-version: "3.9"
-   
+version: '3'
+
 services:
 
-    bank_db:
-        image: postgres
-        container_name: bank_db
-        ports:
-            - "5432:5432"
-        volumes:
-            - ./data/db:/var/lib/postgresql/data
-        networks:
-            - djangonetwork
+  php:
+    container_name: bank_php
+    environment:
+      APP_ENV: dev
+    build:
+      context: .
+      dockerfile: Dockerfile-php
+    volumes:
+      - ./symfony/:/var/www/symfony/
+    depends_on:
+      - database
+    networks:
+      - bank
 
-    bank_web:
-        container_name: bank_web
-        build: .
-        command: python manage.py runserver 0.0.0.0:8000
-        volumes:
-            - .:/code
-        env_file:
-            - db.env
-        ports:
-            - "8000:8000"
-        depends_on:
-            - bank_db
-        networks:
-            - djangonetwork
+  nginx:
+    container_name: bank_nginx
+    build:
+      context: .
+      dockerfile: Dockerfile-nginx
+    volumes:
+      - ./symfony/:/var/www/symfony/
+    ports:
+      - "8001:80"
+    networks:
+      - bank
 
-    bank_pgadmin:
-        container_name: bank_pgadmin
-        image: dpage/pgadmin4
-        restart: always
-        ports:
-          - "5555:80"
-        depends_on:
-          - bank_db
-        links:
-          - bank_db
-        environment:
-          PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
-          PGADMIN_DEFAULT_PASSWORD: root
+  database:
+      container_name: bank_database
+      image: postgres:13-alpine
+      environment:
+        POSTGRES_USER: main
+        POSTGRES_PASSWORD: main
+        POSTGRES_DB: main
+      ports:
+        - "5432:5432"
 networks:
-    djangonetwork:
-        driver: bridge
+  bank:
+
