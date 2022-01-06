@@ -4,13 +4,13 @@ services:
 
   php:
     container_name: bank_php
-    environment:
-      APP_ENV: dev
+    env_file:
+      - php/php.env
     build:
-      context: .
-      dockerfile: Dockerfile-php
+      context: ..
+      dockerfile: docker/php/Dockerfile-php
     volumes:
-      - ./symfony/:/var/www/symfony/
+      - ./src/:/var/www/symfony/
     depends_on:
       - database
     networks:
@@ -20,23 +20,28 @@ services:
     container_name: bank_nginx
     build:
       context: .
-      dockerfile: Dockerfile-nginx
+      dockerfile: nginx/Dockerfile-nginx
     volumes:
-      - ./symfony/:/var/www/symfony/
+      - ./../src/:/var/www/src/
     ports:
       - "8001:80"
+    depends_on:
+      - php
     networks:
       - bank
 
   database:
       container_name: bank_database
       image: postgres:13-alpine
-      environment:
-        POSTGRES_USER: main
-        POSTGRES_PASSWORD: main
-        POSTGRES_DB: main
+      env_file:
+        - database/database.env
+      volumes:
+        - ./database/:/var/lib/database/
       ports:
         - "5432:5432"
+      networks:
+        - bank
+
 networks:
   bank:
 
