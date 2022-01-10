@@ -1,0 +1,47 @@
+version: '3'
+
+services:
+
+  php:
+    container_name: bank_php
+    env_file:
+      - php/php.env
+    build:
+      context: ..
+      dockerfile: docker/php/Dockerfile-php
+    volumes:
+      - ./src/:/var/www/symfony/
+    depends_on:
+      - database
+    networks:
+      - bank
+
+  nginx:
+    container_name: bank_nginx
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile-nginx
+    volumes:
+      - ./../src/:/var/www/src/
+    ports:
+      - "8001:80"
+    depends_on:
+      - php
+    networks:
+      - bank
+
+  database:
+      container_name: bank_database
+      image: postgres:13-alpine
+      env_file:
+        - database/database.env
+      volumes:
+        - ./database/:/var/lib/database/
+      ports:
+        - "5432:5432"
+      networks:
+        - bank
+
+networks:
+  bank:
+
