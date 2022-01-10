@@ -1,5 +1,0 @@
-#jakiego obrazu chcemy uzyc
-FROM nginx:latest
-
-#przekopiowanie zawartosci z lokalu do obrazu
-COPY nginx/default.conf /etc/nginx/conf.d
