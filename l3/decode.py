@@ -30,6 +30,7 @@ def get_key():
     return [get_best_key(get_sample_keys(i), i) for i in range(longest_cryptogram)]
 
 
+#znajduje przykładowe klucze
 def get_sample_keys(index):
     sample_keys = {}
     for cryptogram in cryptograms:
@@ -42,31 +43,31 @@ def get_sample_keys(index):
     return [k for k in sorted(sample_keys.keys(),
                                 key=lambda k: sample_keys[k], reverse=True)]
 
-def get_letter(index, crypt):
-    if index < len(crypt):
-        return crypt[index]
+#bierze z kryptogramu literkę o indeksie index 
+def get_letter(index, cryptogram):
+    if index < len(cryptogram):
+        return cryptogram[index]
     else:
         return ' '
 
+#sposrod kluczy wybiera najlepszy
 def get_best_key(keys, pos):
 
     best_counter = 0
-    for letter in keys:
+    for sample_key in keys:
         counter = 0
         for crypt in cryptograms:
-            if (pos >= len(crypt)):
-                continue
-            if (chr(ord(get_letter(pos, crypt)) ^ letter)) in letters_distribution.keys():
+            if (chr(ord(get_letter(pos, crypt)) ^ sample_key)) in letters_distribution.keys():
                 counter += 1
         if counter > best_counter:
             best_counter = counter
-            best_possible = letter
+            best_possible = sample_key
 
     return best_possible
 
 def print_cryptogram(cryptogram, i):
 
-    result = "\n\n\nKryptogram %d\n:"%i
+    result = "\n\n\nKryptogram %d\n:"%(i+1)
     for i in range(0, len(cryptogram)):
         result += chr(ord(get_letter(i, cryptogram)) ^ key[i])
     print(result)
